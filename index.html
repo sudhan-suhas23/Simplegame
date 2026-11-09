@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+
+  <title>Roll & Reveal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <div class="background">
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
+    <div class="sparkles"></div>
+  </div>
+
+
+  <!-- =========================
+       WELCOME / ROOM SCREEN
+  ========================== -->
+
+  <main id="welcomeScreen" class="screen active">
+
+    <section class="welcome-card glass-card">
+
+      <div class="brand">
+        <div class="brand-dice">ROLL</div>
+        <span class="brand-line"></span>
+        <div class="brand-reveal">REVEAL</div>
+      </div>
+
+      <p class="brand-subtitle">
+        Two people. One roll. A hundred unexpected conversations.
+      </p>
+
+
+      <div class="players-preview">
+
+        <div class="player-preview-card">
+
+          <div class="avatar sudhan-avatar">S</div>
+
+          <div>
+            <strong>Sudhan</strong>
+            <span>Ready to reveal</span>
+          </div>
+
+        </div>
+
+
+        <div class="player-preview-card">
+
+          <div class="avatar raksha-avatar">R</div>
+
+          <div>
+            <strong>Raksha</strong>
+            <span>Ready to reveal</span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="roomSetup" class="room-setup">
+
+        <div class="setup-tabs">
+
+          <button
+            type="button"
+            class="setup-tab active"
+            data-tab="create"
+          >
+            Create Room
+          </button>
+
+          <button
+            type="button"
+            class="setup-tab"
+            data-tab="join"
+          >
+            Join Room
+          </button>
+
+        </div>
+
+
+        <!-- CREATE ROOM -->
+
+        <div id="createPanel" class="setup-panel active">
+
+          <label>Who are you?</label>
+
+          <div class="identity-buttons">
+
+            <button
+              type="button"
+              class="identity-btn selected"
+              data-player="Sudhan"
+            >
+              Sudhan
+            </button>
+
+            <button
+              type="button"
+              class="identity-btn"
+              data-player="Raksha"
+            >
+              Raksha
+            </button>
+
+          </div>
+
+          <button
+            id="createRoomBtn"
+            type="button"
+            class="primary-btn large-btn"
+          >
+            Create Game Room
+          </button>
+
+        </div>
+
+
+        <!-- JOIN ROOM -->
+
+        <div id="joinPanel" class="setup-panel">
+
+          <label for="joinRoomCode">Room Code</label>
+
+          <input
+            id="joinRoomCode"
+            type="text"
+            placeholder="Enter room code"
+            maxlength="20"
+            autocomplete="off"
+          />
+
+          <label>Who are you?</label>
+
+          <div class="identity-buttons">
+
+            <button
+              type="button"
+              class="join-identity-btn selected"
+              data-player="Sudhan"
+            >
+              Sudhan
+            </button>
+
+            <button
+              type="button"
+              class="join-identity-btn"
+              data-player="Raksha"
+            >
+              Raksha
+            </button>
+
+          </div>
+
+          <button
+            id="joinRoomBtn"
+            type="button"
+            class="primary-btn large-btn"
+          >
+            Join Game
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ROOM CREATED -->
+
+      <div id="roomCreatedBox" class="room-created hidden">
+
+        <p class="small-label">
+          Your private room code
+        </p>
+
+        <div class="room-code-display">
+
+          <span id="createdRoomCode">------</span>
+
+          <button
+            id="copyRoomCodeBtn"
+            type="button"
+            class="icon-btn"
+          >
+            Copy
+          </button>
+
+        </div>
+
+        <p class="helper-text">
+          Share this code with the other player.
+        </p>
+
+        <button
+          id="enterCreatedRoomBtn"
+          type="button"
+          class="primary-btn large-btn"
+        >
+          Enter Game
+        </button>
+
+      </div>
+
+
+      <p id="welcomeStatus" class="status-text"></p>
+
+    </section>
+
+  </main>
+
+
+
+  <!-- =========================
+       GAME SCREEN
+  ========================== -->
+
+  <main id="gameScreen" class="screen">
+
+    <div class="game-shell">
+
+
+      <!-- HEADER -->
+
+      <header class="game-header">
+
+        <div class="header-brand">
+
+          <span class="mini-logo">R&R</span>
+
+          <div>
+            <strong>ROLL & REVEAL</strong>
+            <span id="roomCodeHeader">ROOM ------</span>
+          </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+          <button
+            id="soundToggleBtn"
+            type="button"
+            class="header-btn"
+          >
+            Sound Off
+          </button>
+
+          <button
+            id="resetGameBtn"
+            type="button"
+            class="header-btn danger-outline"
+          >
+            Reset
+          </button>
+
+        </div>
+
+      </header>
+
+
+
+      <!-- STATS -->
+
+      <section class="stats-grid">
+
+        <div id="sudhanStat" class="stat-card">
+
+          <div class="stat-avatar sudhan-avatar">S</div>
+
+          <div>
+            <span>Sudhan</span>
+            <strong id="sudhanScore">0</strong>
+            <small>answered</small>
+          </div>
+
+        </div>
+
+
+        <div class="progress-card">
+
+          <span class="small-label">
+            SESSION PROGRESS
+          </span>
+
+          <strong id="progressText">
+            0 / 135
+          </strong>
+
+          <div class="progress-track">
+            <div id="progressBar" class="progress-fill"></div>
+          </div>
+
+        </div>
+
+
+        <div id="rakshaStat" class="stat-card">
+
+          <div class="stat-avatar raksha-avatar">R</div>
+
+          <div>
+            <span>Raksha</span>
+            <strong id="rakshaScore">0</strong>
+            <small>answered</small>
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <div class="game-layout">
+
+
+        <!-- MAIN GAME -->
+
+        <section class="game-main">
+
+
+          <!-- TURN STATUS -->
+
+          <div class="turn-status-card">
+
+            <div class="turn-indicator">
+
+              <span id="turnDot" class="turn-dot"></span>
+
+              <span id="turnStatusText">
+                Waiting for the game to begin
+              </span>
+
+            </div>
+
+            <span
+              id="playerIdentityText"
+              class="identity-label"
+            ></span>
+
+          </div>
+
+
+
+          <!-- DICE -->
+
+          <section id="diceSection" class="dice-section">
+
+            <div class="dice-stage">
+
+              <div id="dice" class="dice">
+
+                <div class="dice-face face-front">
+                  <span class="dot"></span>
+                </div>
+
+                <div class="dice-face face-back">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+
+                <div class="dice-face face-right">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+
+                <div class="dice-face face-left">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+
+                <div class="dice-face face-top">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+
+                <div class="dice-face face-bottom">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <p id="diceMessage" class="dice-message">
+              The next reveal is waiting.
+            </p>
+
+
+            <button
+              id="rollDiceBtn"
+              type="button"
+              class="primary-btn roll-btn"
+            >
+              Roll the Dice
+            </button>
+
+          </section>
+
+
+
+          <!-- CATEGORY -->
+
+          <section class="category-section">
+
+            <div class="section-heading">
+
+              <span>Question Category</span>
+
+              <button
+                id="shuffleCategoryBtn"
+                type="button"
+                class="text-btn"
+              >
+                Shuffle
+              </button>
+
+            </div>
+
+
+            <div
+              id="categoryFilters"
+              class="category-filters"
+            ></div>
+
+          </section>
+
+
+
+          <!-- QUESTION -->
+
+          <section
+            id="questionCard"
+            class="question-card glass-card hidden"
+          >
+
+            <div class="question-meta">
+
+              <span
+                id="questionCategory"
+                class="category-pill"
+              >
+                Category
+              </span>
+
+              <span
+                id="answeringPlayer"
+                class="answering-player"
+              >
+                Waiting
+              </span>
+
+            </div>
+
+
+            <h2 id="questionText">
+              Your question will appear here.
+            </h2>
+
+
+            <p id="questionHint" class="question-hint">
+              No pressure. Skip anything you do not feel like answering.
+            </p>
+
+
+            <div class="question-actions">
+
+              <button
+                id="answeredBtn"
+                type="button"
+                class="primary-btn"
+              >
+                Mark Answered
+              </button>
+
+              <button
+                id="anotherQuestionBtn"
+                type="button"
+                class="secondary-btn"
+              >
+                Another Question
+              </button>
+
+              <button
+                id="skipQuestionBtn"
+                type="button"
+                class="ghost-btn"
+              >
+                Skip, No Pressure
+              </button>
+
+              <button
+                id="nextTurnBtn"
+                type="button"
+                class="dark-btn"
+              >
+                Next Turn
+              </button>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- HISTORY -->
+
+          <section class="history-section glass-card">
+
+            <div class="section-heading">
+
+              <span>Recently Asked</span>
+
+              <span class="small-label">
+                THIS SESSION
+              </span>
+
+            </div>
+
+
+            <div
+              id="questionHistory"
+              class="question-history"
+            >
+              <p class="empty-history">
+                No questions yet.
+              </p>
+            </div>
+
+          </section>
+
+
+        </section>
+
+
+
+        <!-- CHAT -->
+
+        <aside class="chat-panel glass-card">
+
+          <div class="chat-header">
+
+            <div>
+
+              <span class="small-label">
+                LIVE
+              </span>
+
+              <h3>Conversation</h3>
+
+            </div>
+
+
+            <span
+              id="chatStatus"
+              class="chat-online"
+            >
+              Connecting
+            </span>
+
+          </div>
+
+
+          <div
+            id="chatMessages"
+            class="chat-messages"
+          >
+
+            <div class="system-message">
+              Your conversation starts here.
+            </div>
+
+          </div>
+
+
+          <form
+            id="chatForm"
+            class="chat-input-area"
+          >
+
+            <input
+              id="chatInput"
+              type="text"
+              maxlength="1000"
+              placeholder="Write something..."
+              autocomplete="off"
+            />
+
+            <button
+              type="submit"
+              class="send-btn"
+            >
+              Send
+            </button>
+
+          </form>
+
+        </aside>
+
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+
+  <!-- =========================
+       FINAL SCREEN
+  ========================== -->
+
+  <main id="finalScreen" class="screen">
+
+    <section class="final-card glass-card">
+
+      <span class="small-label">
+        SESSION COMPLETE
+      </span>
+
+      <h1>LOOK AT YOU TWO!</h1>
+
+      <p id="closingMessage">
+        A surprisingly good collection of answers.
+      </p>
+
+
+      <div class="final-stats">
+
+        <div>
+          <span>Total Played</span>
+          <strong id="finalTotal">0</strong>
+        </div>
+
+        <div>
+          <span>Sudhan</span>
+          <strong id="finalSudhan">0</strong>
+        </div>
+
+        <div>
+          <span>Raksha</span>
+          <strong id="finalRaksha">0</strong>
+        </div>
+
+        <div>
+          <span>Top Category</span>
+          <strong id="finalCategory">-</strong>
+        </div>
+
+      </div>
+
+
+      <button
+        id="playAgainBtn"
+        type="button"
+        class="primary-btn large-btn"
+      >
+        Play Again
+      </button>
+
+    </section>
+
+  </main>
+
+
+
+  <!-- CELEBRATION -->
+
+  <div
+    id="celebrationLayer"
+    class="celebration-layer"
+  ></div>
+
+
+
+  <!-- TOAST -->
+
+  <div id="toast" class="toast"></div>
+
+
+
+  <!-- RESET MODAL -->
+
+  <div
+    id="resetModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-card">
+
+      <h3>Reset this game?</h3>
+
+      <p>
+        This will clear the current questions, scores and session progress.
+      </p>
+
+
+      <div class="modal-actions">
+
+        <button
+          id="cancelResetBtn"
+          type="button"
+          class="secondary-btn"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="confirmResetBtn"
+          type="button"
+          class="danger-btn"
+        >
+          Reset Game
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
